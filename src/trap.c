@@ -6,6 +6,9 @@
 #include <arch/timer.h>
 #include <kernel/serial.h>
 
+/* Supervisor Interrupt Enable (Bit 1) */
+#define SSTATUS_SIE (1UL << 1)
+
 extern void trap_entry();
 
 void handle_irq()
@@ -25,7 +28,7 @@ void handle_irq()
         
         /* Notifica o PLIC que o tratamento terminou */
         if (irq) {
-            plic_hart_complete_irq(irq);
+            plic_hart_complete_irq(0, irq);
         }
     }
 }
