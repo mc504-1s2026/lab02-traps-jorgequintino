@@ -5,27 +5,6 @@
 #include <kernel/serial.h>
 #include <kernel/string.h>
 
-/* Funções de utilidade nativas se disponíveis, caso não as tenha, estão embutidas abaixo */
-static int strcmp(const char *s1, const char *s2) {
-    while (*s1 && (*s1 == *s2)) { s1++; s2++; }
-    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
-}
-
-static int strncmp(const char *s1, const char *s2, size_t n) {
-    while (n && *s1 && (*s1 == *s2)) { ++s1; ++s2; --n; }
-    if (n == 0) return 0;
-    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
-}
-
-static int atoi(const char *str) {
-    int res = 0;
-    while (*str >= '0' && *str <= '9') {
-        res = res * 10 + (*str - '0');
-        str++;
-    }
-    return res;
-}
-
 extern int _hartid[];
 void kmain()
 {
@@ -49,7 +28,7 @@ void kmain()
     size_t cmd_idx = 0;
     char rx_buf[256];
 
-    printf("> ");
+    printk("> ");
 
     while (1) {
         /* Lê o que a interrupção já salvou no driver */
@@ -67,22 +46,22 @@ void kmain()
                     if (strcmp(cmd_buf, "uptime") == 0) {
                         u64 time = timer_read();
                         u64 uptime_secs = time / TIMER_FREQ;
-                        printf("%llus\n", uptime_secs);
+                        printk("%llus\n", uptime_secs);
                     } 
                     else if (strncmp(cmd_buf, "echo ", 5) == 0) {
-                        printf("%s\n", cmd_buf + 5);
+                        printk("%s\n", cmd_buf + 5);
                     } 
                     else if (strncmp(cmd_buf, "alarm ", 6) == 0) {
                         int secs = atoi(cmd_buf + 6);
                         timer_set_alarm((u64)secs);
                     } 
                     else {
-                        printf("Unknown command: %s\n", cmd_buf);
+                        printk("Unknown command: %s\n", cmd_buf);
                     }
                 }
                 
                 cmd_idx = 0;
-                printf("> ");
+                printk("> ");
             } 
             else if (c == '\b' || c == 0x7F) {
                 if (cmd_idx > 0) {
