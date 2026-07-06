@@ -20,7 +20,7 @@ void handle_irq()
     } 
     else if (cause == TRAP_EXTERNAL_IRQ) {
         /* Pede ao PLIC o IRQ atual */
-        u32 irq = plic_hart_claim_irq();
+        u32 irq = plic_hart_claim_irq(0);
         
         if (irq == IRQ_SERIAL) {
             serial_irq();
