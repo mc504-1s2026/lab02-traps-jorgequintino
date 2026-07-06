@@ -3,6 +3,9 @@
 #include <arch/csr.h>
 #include <kernel/printf.h>
 
+/* Supervisor Timer Interrupt Enable (Bit 5) */
+#define SIE_STIE (1UL << 5)
+
 u64 timer_read()
 {
     return csr_read(CSR_TIME);
@@ -29,5 +32,5 @@ void timer_irq()
 {
     /* Desarma o timer setando para o máximo valor possível */
     csr_write(CSR_STIMECMP, -1ULL);
-    printf("alarm\n> ");
+    printk("alarm\n> ");
 }
