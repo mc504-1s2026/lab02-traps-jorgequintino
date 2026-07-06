@@ -32,5 +32,5 @@ void timer_irq()
 {
     /* Desarma o timer setando para o máximo valor possível */
     csr_write(CSR_STIMECMP, -1ULL);
-    printk("alarm\n> ");
+    printk(0, "alarm\n> ");
 }
