@@ -23,7 +23,7 @@ static struct serial_dev sdev = {0};
 
 void serial_init()
 {
-
+    spin_init(&sdev.lock);
     /* Desabilita todas as interrupções antes de configurar */
     REG8(SERIAL_IER) = 0x00;
 
@@ -76,14 +76,15 @@ void serial_irq()
 size_t serial_read(char *buf)
 {
     size_t bytes_read = 0;
+    u64 flags;
+    flags = spin_lock_irqsave(&sdev.lock);
     
-    spin_lock(&sdev.lock);
     bytes_read = sdev.len;
     for (size_t i = 0; i < bytes_read; i++) {
         buf[i] = sdev.buf[i];
     }
     sdev.len = 0;
-    spin_unlock(&sdev.lock);
+    spin_unlock_irqrestore(&sdev.lock, flags);
     
     return bytes_read;
 }
