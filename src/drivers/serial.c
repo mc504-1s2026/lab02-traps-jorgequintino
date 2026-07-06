@@ -3,6 +3,10 @@
 #include <arch/spinlock.h>
 #include <arch/plic.h>
 #include <kernel/string.h>
+#include <arch/csr.h>
+
+/* Supervisor External Interrupt Enable (Bit 9) */
+#define SIE_SEIE (1UL << 9)
 
 /* Macros utilitárias para acessar os registradores como memória */
 #define REG8(offset) (*(volatile u8 *)((u8*)SERIAL_BASE + (offset)))
@@ -19,7 +23,6 @@ static struct serial_dev sdev = {0};
 
 void serial_init()
 {
-    spinlock_init(&sdev.lock);
 
     /* Desabilita todas as interrupções antes de configurar */
     REG8(SERIAL_IER) = 0x00;
@@ -41,8 +44,9 @@ void serial_irq_enable()
     REG8(SERIAL_IER) |= SERIAL_IER_ERBFI;
 
     /* Configura o PLIC para a porta serial */
-    plic_set_priority(IRQ_SERIAL, 1);
-    plic_irq_enable(IRQ_SERIAL);
+    plic_irq_set_priority(IRQ_SERIAL, 1);
+    plic_hart_set_threshold(0, 0);
+    plic_hart_enable_irq(0, IRQ_SERIAL);
 
     /* Habilita interrupções externas no hart */
     csr_set(CSR_SIE, SIE_SEIE);
@@ -51,7 +55,7 @@ void serial_irq_enable()
 void serial_irq_disable()
 {
     REG8(SERIAL_IER) &= ~SERIAL_IER_ERBFI;
-    plic_irq_disable(IRQ_SERIAL);
+    plic_irq_set_priority(IRQ_SERIAL, 0);
     csr_clear(CSR_SIE, SIE_SEIE);
 }
 
