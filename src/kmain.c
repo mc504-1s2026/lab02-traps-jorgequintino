@@ -48,7 +48,7 @@ void kmain()
             
             /* Carriage return identifica execução do comando */
             if (c == '\r') {
-                printf("\n");
+                printk(0, "\n");
                 cmd_buf[cmd_idx] = '\0';
                 
                 if (cmd_idx > 0) {
