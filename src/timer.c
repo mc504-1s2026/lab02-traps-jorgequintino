@@ -1,32 +1,36 @@
 #include <arch/timer.h>
 #include <kernel/panic.h>
+#include <arch/csr.h>
+#include <kernel/printf.h>
+
+/* Supervisor Timer Interrupt Enable (Bit 5) */
+#define SIE_STIE (1UL << 5)
 
 u64 timer_read()
 {
-	/* not implemented */
-	BUG();
+    return csr_read(CSR_TIME);
 }
 
 void timer_irq_enable()
 {
-	/* not implemented */
-	BUG();
+    csr_set(CSR_SIE, SIE_STIE);
 }
 
 void timer_irq_disable()
 {
-	/* not implemented */
-	BUG();
+    csr_clear(CSR_SIE, SIE_STIE);
 }
 
 void timer_set_alarm(u64 secs)
 {
-	/* not implemented */
-	BUG();
+    u64 now = timer_read();
+    u64 tick_in = now + (secs * TIMER_FREQ);
+    csr_write(CSR_STIMECMP, tick_in);
 }
 
 void timer_irq()
 {
-	/* not implemented */
-	BUG();
+    /* Desarma o timer setando para o máximo valor possível */
+    csr_write(CSR_STIMECMP, -1ULL);
+    printk(0, "alarm\n> ");
 }
