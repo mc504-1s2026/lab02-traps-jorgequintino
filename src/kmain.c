@@ -6,6 +6,15 @@
 #include <kernel/string.h>
 
 extern int _hartid[];
+static int atoi(const char *str) {
+    int res = 0;
+    while (*str >= '0' && *str <= '9') {
+        res = res * 10 + (*str - '0');
+        str++;
+    }
+    return res;
+}
+
 void kmain()
 {
     printk_set_level(LOG_DEBUG);
@@ -28,7 +37,7 @@ void kmain()
     size_t cmd_idx = 0;
     char rx_buf[256];
 
-    printk("> ");
+    printk(0, "> ");
 
     while (1) {
         /* Lê o que a interrupção já salvou no driver */
@@ -46,22 +55,22 @@ void kmain()
                     if (strcmp(cmd_buf, "uptime") == 0) {
                         u64 time = timer_read();
                         u64 uptime_secs = time / TIMER_FREQ;
-                        printk("%llus\n", uptime_secs);
+                        printk(0, "%llus\n", uptime_secs);
                     } 
                     else if (strncmp(cmd_buf, "echo ", 5) == 0) {
-                        printk("%s\n", cmd_buf + 5);
+                        printk(0, "%s\n", cmd_buf + 5);
                     } 
                     else if (strncmp(cmd_buf, "alarm ", 6) == 0) {
                         int secs = atoi(cmd_buf + 6);
                         timer_set_alarm((u64)secs);
                     } 
                     else {
-                        printk("Unknown command: %s\n", cmd_buf);
+                        printk(0, "Unknown command: %s\n", cmd_buf);
                     }
                 }
                 
                 cmd_idx = 0;
-                printk("> ");
+                printk(0, "> ");
             } 
             else if (c == '\b' || c == 0x7F) {
                 if (cmd_idx > 0) {
